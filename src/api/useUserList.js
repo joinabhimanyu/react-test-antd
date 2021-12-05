@@ -3,6 +3,7 @@ import { useState } from "react";
 const getDummyuserListData=()=>new Promise((resolve,reject)=>{
     try {
         const data=[{
+            key:1,
             firstname:'abhi',
             lastname:'chak',
             age:'33',
@@ -14,6 +15,7 @@ const getDummyuserListData=()=>new Promise((resolve,reject)=>{
             organization:'Wipro',
             nationality:'Indian'
         },{
+            key:2,
             firstname:'ertert',
             lastname:'dgfg',
             age:'34',
@@ -41,6 +43,41 @@ export const useGetUserList=async()=>{
     const [isError, setisError]=useState(false)
     const [error, seterror]=useState(null);
 
+    const SortUser=(sortfield, sortdirection, list)=>{
+        let l=[]
+        if (list) {
+            l=JSON.parse(JSON.stringify(list))
+        } else{
+            l=JSON.parse(JSON.stringify(userlist))
+        }
+        if (l) {
+            let sorted=[]
+            if (sortdirection==="Desc") {
+                sorted=l.sort((a,b)=>b[sorted]-a[sortfield])
+            } else if(sortdirection==='Asc'){
+                sorted=l.sort((a,b)=>a[sortfield]-b[sortfield])
+            }
+            setuserlist(JSON.parse(JSON.stringify(sorted)))
+        }
+    }
+    const AddUser=(user)=>{
+        const list=[...userlist, user]
+        SortUser('key','Desc',list)
+    }
+    const RemoveUser=(key)=>{
+        const list=userlist.filter(x=>x.key!==key)
+        SortUser('key', 'Desc', list)
+    }
+    const UpdateUser=(user)=>{
+        const {key}=user;
+        const list=JSON.parse(JSON.stringify(userlist))
+        const f=list.filter(x=>x.key===key)
+        if (f) {
+            f={...user}
+        }
+        SortUser('key', 'Desc', list)
+    }
+
     setisLoading(true)
     try {
         const {data, status, isError, error}=await getDummyuserListData()
@@ -57,5 +94,16 @@ export const useGetUserList=async()=>{
         seterror(error)
         setisLoading(false)
     }
-    return {userlist, status, isError, error, isLoading};
+    return {
+        userlist, 
+        status, 
+        isError, 
+        error, 
+        isLoading, 
+        
+        SortUser,
+        AddUser,
+        RemoveUser,
+        UpdateUser
+    };
 }
